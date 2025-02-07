@@ -310,19 +310,17 @@ const TicketTable = () =>
         </Box>
         
         <TableContainer
-        
-  component={Paper}
-  sx={{
-    
-    
-    maxHeight: 390,
-    border: "1px solid black", // Set border width and color (adjust color as needed)
-    borderRadius: '8px',
-    marginTop: '0px' // Optional: rounded corners
-  }}
->
-              <Table stickyHeader>
-              <TableHead>
+              component={Paper}
+              sx={{
+                maxHeight: 390,
+                border: "1px solid black", // Set border width and color (adjust color as needed)
+                borderRadius: '8px',
+                marginTop: '0px',
+              // Optional: rounded corners
+              }}
+            >
+    <Table stickyHeader>
+    <TableHead>
   <TableRow>
     <TableCell sx={{ fontSize: 14, fontFamily: "Source Sans Pro", backgroundColor: "#d82b27", color: "white" }}>ID</TableCell>
     <TableCell sx={{ fontSize: 14, fontFamily: "Source Sans Pro", backgroundColor: "#d82b27", color: "white" }}>Message</TableCell>
@@ -361,7 +359,7 @@ const TicketTable = () =>
                 </TableBody>
               </Table>
          </TableContainer>
-        <CustomPagination sx={{mt:"20px"}}
+        <CustomPagination sx={{mt:"30px" }}
             totalPages={Math.ceil(totalPages / rowsPerPage)}
             currentPage={page}
           />

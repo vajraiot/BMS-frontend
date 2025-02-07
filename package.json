@@ -1,10 +1,11 @@
 {
+  "homepage": "http://122.175.45.16:83/",
   "name": "parcelproject",
   "version": "1.0.0",
   "scripts": {
     "test": "jest",
     "start": "parcel index.html",
-    "build": "parcel build index.html"
+    "build": "parcel build index.html --dist-dir build && copy web.config build\\web.config"
   },
   "keywords": [],
   "author": "",

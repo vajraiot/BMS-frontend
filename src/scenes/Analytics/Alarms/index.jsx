@@ -139,14 +139,6 @@ const Alarms = () => {
     <div>
         <ReportsBar pageType="alarms" />
 
-        <Typography 
-  variant="h4" 
-  gutterBottom 
-  sx={{ textAlign: "center", width: "100%" }}
->
-  Alarms Reports
-</Typography>
-
       {formattedData && formattedData.length > 0 ? (
         <>
           <TableContainer

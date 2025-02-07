@@ -121,9 +121,24 @@ const Topbar = ({ onLogout,vendorName,locationName=""}) => {
     options={siteOptions.map((site) => site.siteId)}
     value={siteId}
     onChange={(event, newValue) => setSiteId(newValue)}
-    renderInput={(params) => <TextField {...params} label="Site ID" />}
+    renderInput={(params) => <TextField {...params} label="Site ID" 
+    InputLabelProps={{
+      sx: {
+        fontWeight: "bold",
+      },
+    }}
+    fullWidth
+    sx={{
+      "& .MuiInputBase-root": {
+        fontWeight: "bold",
+        height: "40px", // Adjust the height here
+        marginTop:'5px'
+      },
+    }}
+    />}
     sx={{ width: 200 }}
-  />
+/>
+    
 
   <Autocomplete
     disablePortal

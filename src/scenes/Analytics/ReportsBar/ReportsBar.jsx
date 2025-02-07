@@ -101,9 +101,10 @@ const ReportsBar = ({ pageType }) => {
     </li>
   );
   return (
-    <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" p={2} gap={2}>
+
+    <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" p={2} gap={2} >
       {/* Filters and Search Section */}
-      <Box display="grid" gridTemplateColumns="repeat(5, 1fr)" gap={2}>
+      <Box display="grid" gridTemplateColumns="repeat(5, 1fr)" gap={2} >
       <Autocomplete
           disablePortal
           disableClearable
