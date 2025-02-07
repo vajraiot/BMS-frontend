@@ -17,7 +17,7 @@ const LoginPage = () => {
 
   const fetchRoles = async () => {
     try {
-      const response = await fetch("http://localhost:51470/getListofLoginRoles");
+      const response = await fetch("http://122.175.45.16:51270/getListofLoginRoles");
       if (!response.ok) {
         throw new Error("Failed to fetch roles");
       }

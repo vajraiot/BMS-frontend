@@ -19,6 +19,7 @@ const Footer = () => {
         justifyContent: "center",
         padding: "4px 0",
         display: "flex",
+        width: "100%",
         alignItems: "center",
         flexDirection: "row",
         marginLeft:"200px",

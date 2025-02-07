@@ -97,16 +97,6 @@ const DayWise = () => {
       0
     );
 
-    // Add a summary row at the end
-    // formattedData.push({
-    //   dayWiseDate: "Total", // Label for the last row
-    //   chargeOrDischargeCycle: "-",
-    //   cumulativeAHIn: "-",
-    //   cumulativeAHOut: "-",
-    //   totalChargingEnergy: "-",
-    //   totalDischargingEnergy: "-",
-    //   batteryRunHours: formatToTime(totalBatteryRunHours), // Total in HH:MM:SS
-    // });
 
     return formattedData;
   };
@@ -126,10 +116,6 @@ const DayWise = () => {
   return (
     <div>
        <ReportsBar pageType="daywise" />
-
-       <Typography variant="h4" gutterBottom align="center">
-  DayWise Reports
-</Typography>
 
 
       {formattedData && formattedData.length > 0 ? (
@@ -179,7 +165,11 @@ const DayWise = () => {
                       }}
                     >
                       {Object.values(row).map((value, idx) => (
-                        <TableCell key={idx}>{value}</TableCell>
+                        <TableCell key={idx}    sx={{ 
+                          border: '1px solid #ccc', // Ensure visibility
+                          padding: '5px', // Decreased padding
+                          fontWeight: 'bold', // Bold text
+                        }}>{value}</TableCell>
                       ))}
                     </TableRow>
                   ))}

@@ -16,7 +16,34 @@ import {
 } from "@mui/material";
 
 const columnMappings = {
-  // Your column mappings...
+  bmsManufacturerID: "BMS Manufacturer ID",
+  installationDate: "Installation Date",
+  cellsConnectedCount: "Connected Cells Count",
+  problemCells: "Problem Cells",
+  stringVoltage: "String Voltage (V)",
+  systemPeakCurrentInChargeOneCycle: "Peak Current",
+  averageDischargingCurrent: "Avg Discharging(A)",
+  averageChargingCurrent: "Avg Charging(A)",
+  ahInForOneChargeCycle: "Ah In for 1 Charge Cycle",
+  ahOutForOneDischargeCycle: "Ah Out for 1  Discharge Cycle",
+  cumulativeAHIn: "Cumulative Ah In",
+  cumulativeAHOut: "Cumulative Ah Out",
+  chargeTimeCycle: "Charge Time Cycle (s)",
+  dischargeTimeCycle: "Discharge Time Cycle (s)",
+  totalChargingEnergy: "Total Charging Energy (kWh)",
+  totalDischargingEnergy: "Total Discharging Energy (kWh)",
+  everyHourAvgTemp: "Every Hour Avg Temp (°C)",
+  cumulativeTotalAvgTempEveryHour: "Cumulative Avg Temp Every Hour (°C)",
+  chargeOrDischargeCycle: "Charge/Discharge Cycle Count",
+  socLatestValueForEveryCycle: "SOC Latest Value (%)",
+  dodLatestValueForEveryCycle: "DOD Latest Value (%)",
+  systemPeakCurrentInDischargeOneCycle: "System Peak Current (Discharge)",
+  instantaneousCurrent: "Instantaneous Current (A)",
+  ambientTemperature: "Ambient Temperature (°C)",
+  batteryRunHours: "Battery Run Hours (s)",
+  serverTime: "Server Time",
+  packetDateTime: "Packet Date Time",
+  bmsalarmsString: "BMS Alarms String",
 };
 
 const Historical = () => {
@@ -33,15 +60,13 @@ const Historical = () => {
     setOrder(isAscending ? "desc" : "asc");
     setOrderBy(property);
   };
-  function TimeFormat(dateString) {
-    // Parse the UTC date-time string into a Date object
 
-    if(dateString==null){
+  function TimeFormat(dateString) {
+    if (dateString == null) {
       return "";
     }
     const utcDate = new Date(dateString);
 
-    // Return the formatted date as 'YYYY-MM-DD HH:MM:SS.mmm'
     const year = utcDate.getFullYear();
     const month = String(utcDate.getMonth() + 1).padStart(2, '0');
     const day = String(utcDate.getDate()).padStart(2, '0');
@@ -52,6 +77,7 @@ const Historical = () => {
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
   }
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -62,14 +88,14 @@ const Historical = () => {
   };
 
   const dataArray = data.content;
-  
+
   const combineAlarmsData = (dataArray) => {
     if (!dataArray || dataArray.length === 0) return [];
 
     const combinedData = {};
 
     dataArray.forEach((current) => {
-      const { id, bmsalarmsString, deviceId, bmsManufacturerID, installationDate, cellsConnectedCount, problemCells, ...rest } = current;
+      const { id, bmsalarmsString, deviceId, bmsManufacturerID, installationDate, cellsConnectedCount, problemCells, siteId, serialNumber, ...rest } = current;
       if (!combinedData[current.id]) {
         combinedData[current.id] = { ...rest };
       } else {
@@ -103,20 +129,27 @@ const Historical = () => {
 
       {formattedData && formattedData.length > 0 ? (
         <>
-          <TableContainer
+         <TableContainer
             component={Paper}
-            sx={{ width: '100%', overflowY: 'hidden' }}
+            sx={{ marginTop: 1, overflowX: "auto",
+              border: "1px solid black", // Red border for all four sides
+              borderRadius: "8px",
+              paddingBottom: 3, // Adding padding at the bottom
+              height: '379px',
+             }}
           >
             <Table stickyHeader aria-label="sticky table">
               {/* Table Header */}
-              <TableHead >
+              <TableHead>
                 <TableRow>
                   {Object.keys(formattedData[0]).map((key) => (
                     <TableCell
+                      key={key}
                       sx={{
                         fontWeight: "bold",
                         backgroundColor: "#d82b27", // Blue header
                         color: "#ffffff", // White text
+                        padding: '3px', // Decreased padding
                       }}
                     >
                       <TableSortLabel
@@ -145,13 +178,15 @@ const Historical = () => {
                     >
                       {/* Render each value in the row */}
                       {Object.entries(row).map(([key, value], idx) => (
-                    
                         <TableCell
                           key={idx}
-                          sx={{ border: '1px solid #ccc' }} // Ensure visibility
+                          sx={{ 
+                            border: '1px solid #ccc', // Ensure visibility
+                            padding: '5px', // Decreased padding
+                            fontWeight: 'bold', // Bold text
+                          }}
                         >
-                          {
-                          key === 'dcVoltageOLN'
+                          {key === 'dcVoltageOLN'
                             ? (value === 0
                                 ? 'Low'
                                 : value === 1
@@ -167,9 +202,7 @@ const Historical = () => {
                             ? TimeFormat(value)
                             : value !== undefined && value !== null
                             ? value // Otherwise, just show the actual value
-                            : 'No Data'
-                        }
-
+                            : 'No Data'}
                         </TableCell>
                       ))}
                     </TableRow>
