@@ -13,10 +13,6 @@ import {
   fetchAlarmsBatteryandChargerdetails,
 } from "../../../services/apiService";
 import { ColorModeContext, tokens } from "../../../theme.js";
-import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
-import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
-import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
-import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 
 const ReportsBar = ({ pageType }) => {

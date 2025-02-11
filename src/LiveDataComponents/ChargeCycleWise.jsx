@@ -5,12 +5,7 @@ import { tokens } from "../theme.js"
 function ChargeCycleWise({PeakChargeCurrent, AverageChargeCurrent, AmpereHourIn,totalSeconds}) {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
-    // const rawData = {
-    //     PeakChargeCurrent	: "41 A",
-    //     AverageChargeCurrent	:"0.4647 A",
-    //     AmpereHourIn	:"121.5937 Ah",
-    //     ChargeTime	:"261:36:50"
-    //   };
+ // console.log(PeakChargeCurrent +" peak")
     const ChargeTime = (totalSeconds = 0) => {
       try {
         const hours = Math.floor(totalSeconds / 3600);
@@ -38,7 +33,7 @@ function ChargeCycleWise({PeakChargeCurrent, AverageChargeCurrent, AmpereHourIn,
           mt="10px"
           ml="8px"
         >
-          <Typography variant="h6" mb="10px">
+          <Typography variant="h6">
             <strong>Charge-Cycle-Wise</strong>
           </Typography>
           <Box
@@ -46,13 +41,11 @@ function ChargeCycleWise({PeakChargeCurrent, AverageChargeCurrent, AmpereHourIn,
             flexDirection="column"
           >
             {[
-              { label: "Peak Charge Current", value: PeakChargeCurrent },
-              { label: "Avg Charge Current", value: AverageChargeCurrent },
-              { label: "Ampere HourIn", value: AmpereHourIn},
+              { label: "Peak Charge Current", value: PeakChargeCurrent,unit:"A" },
               { label: "Charge Time", value: ChargeTime(totalSeconds)},
              
         
-            ].map(({ label, value }, index) => (
+            ].map(({ label, value ,unit}, index) => (
              <Box
                 key={index}
                 display="flex"
@@ -77,7 +70,7 @@ function ChargeCycleWise({PeakChargeCurrent, AverageChargeCurrent, AmpereHourIn,
                   variant="h5"
                   style={{ color: colors.greenAccent[500] }}
                 >
-                  {value}
+                  {value}{" "}{unit}
                 </Typography>
               </Box>
             ))}

@@ -210,7 +210,7 @@ const FullScreenOverlay = ({ open, onClose, children }) => {
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        // backgroundColor: 'white',
         zIndex: 1300,
         display: 'flex',
         justifyContent: 'center',
@@ -221,7 +221,7 @@ const FullScreenOverlay = ({ open, onClose, children }) => {
         sx={{
           width: '90%',
           height: '90%',
-          backgroundColor: 'black',
+          // backgroundColor: 'white',
           borderRadius: '12px',
           display: 'flex',
           flexDirection: 'column',
@@ -244,7 +244,7 @@ const FullScreenOverlay = ({ open, onClose, children }) => {
             position: 'absolute',
             top: 16,
             right: 16,
-            color: 'white',
+            color: 'black',
           }}
         >
           <CloseIcon />
@@ -281,214 +281,3 @@ const FullScreenOverlay = ({ open, onClose, children }) => {
 
 
 
-// const CellLayout = ({ cellData, thresholds, chargingStatus,siteId,serialNumber }) => {
-//   const [isOpen, setIsOpen] = useState(false);
-
-//   const handleClickOpen = () => {
-//     setIsOpen(true);  
-//   };
-
-//   const handleClose = () => {
-//     setIsOpen(false);
-//   };
-//   // console.log(cellData.cellNumber+" "+siteId +" "+serialNumber)
- 
-//     const theme = useTheme();
-//     const colors = tokens(theme.palette.mode);
-//     // 
-    
-//     const determineLegend = () => {
-//       if (cellData.cellVoltage===65.535  || cellData.cellTemperature === 65535) {
-//         return CellLegends.CommnFail;
-//       } else if (
-//         cellData.cellVoltage <= thresholds.LowVoltage &&
-//         cellData.cellVoltage > thresholds.BatteryAboutToDie
-//       ) {
-//         return CellLegends.BatteryLowVoltage;
-//       } else if (
-//         cellData.cellVoltage <= thresholds.BatteryAboutToDie &&
-//         cellData.cellVoltage > thresholds.OpenBattery
-//       ) {
-//         return CellLegends.BatteryAboutToDie;
-//       } else if (cellData.cellVoltage <= thresholds.OpenBattery) {
-//         return CellLegends.OpenBattery;
-//       } else if (cellData.cellVoltage >= thresholds.HighVoltage) {
-//         return CellLegends.BatteryHighVoltage;
-//       } else if (cellData.cellTemperature >= thresholds.HighTemperature) {
-//         return CellLegends.BatteryHighTemperature;
-//       } else {
-//         return chargingStatus
-//           ? CellLegends. LegendCharging
-//           : CellLegends.LegendDisCharging;
-//       }
-//     };
-  
-//     const legend = determineLegend();
-//     //const classes = useStyles();
-//     return (
-    
-//     <>
-//       {/* Cell Layout */}
-//       <div
-//       style={{
-//         marginTop:"2px",
-//         display: "block",
-//         width: "61px",
-//         overflow: "hidden",
-//         boxShadow: "2px 2px 2px 2px white",
-//         cursor: "pointer",
-//       }}
-//     >
-//       {/* Legend */}
-//       <div
-//         style={{
-//           paddingTop:"1px",
-//           display: "flex",
-//           justifyContent: "center",
-//           alignItems: "center",
-//           background: colors.primary[400],
-         
-//         }}
-//       >
-//         <img
-//           style={{ width: "40px", height: "20px" }}
-//           src={legend}
-//           alt="Cell Legend"
-//         />
-//       </div>
-
-//       {/* Cell Information */}
-//       <div style={{ padding: "8px" }}>
-//         <div
-//           style={{
-//             fontSize: "12px",
-//             textAlign: "center",
-//             border: "0.1px solid ",
-//             borderRadius: "25px",
-//             // padding: "4px 0",
-//           borderColor: colors.greenAccent[300],
-//           }}
-//         >
-//           Cell{" "}
-//           <span style={{ fontWeight: "bolder", marginLeft: "3px" }}>
-//             {cellData.cellNumber}
-//           </span>
-//         </div>
-
-//         <div
-//           style={{
-//             display: "flex",
-//             justifyContent: "flex-start",
-//             alignItems: "center",
-//             color: "white",
-//             // padding: "4px 0",
-//           }}
-//         >
-//           <img
-//             style={{ width: "12px", height: "12px", marginRight: "4px" }}
-//             src={thunder}
-//             alt="Voltage Icon"
-//           />
-//           <span
-//             style={{
-//               fontSize: "12px",
-//               fontWeight: "bold",
-//               color: colors.greenAccent[500],
-//             }}
-//           >
-//             {cellData.cellVoltage}V
-//           </span>
-//         </div>
-
-//         <div
-//           style={{
-//             display: "flex",
-//             justifyContent: "flex-start",
-//             alignItems: "center",
-//             color: "white",
-//             // padding: "4px 0",
-//           }}
-//         >
-//           <img
-//             style={{ width: "12px", height: "12px", marginRight: "4px" }}
-//             src={TemperatureWhite}
-//             alt="Temperature Icon"
-//           />
-//           <span
-//             style={{
-//               fontSize: "12px",
-//               fontWeight: "bold",
-//               color: colors.greenAccent[500],
-//             }}
-//           >
-//             {cellData.cellTemperature}°C
-//           </span>
-//         </div>
-//       </div>
-//     </div>
-
-//       {/* Dialog Box */}
-//       <FullScreenOverlay open={isOpen} onClose={() => setIsOpen(false)}>
-//       <CellVTGraph serial={serialNumber} site={siteId} cellNumber={cellData.cellNumber} />
-//     </FullScreenOverlay>
-
-//     </>
-//   );
-// };
-
-// export default CellLayout;
-
-// const FullScreenOverlay = ({ open, onClose, children }) => {
-//   if (!open) return null;
-
-//   return (
-//     <Box
-//       sx={{
-//         position: "fixed",
-//         top: 0,
-//         left: 0,
-//         width: "100%",
-//         height: "100%",
-//         backgroundColor: "rgba(0, 0, 0, 0.8)",
-//         zIndex: 1300,
-//         display: "flex",
-//         justifyContent: "center",
-//         alignItems: "center",
-//       }}
-//     >
-//       <Box
-//         sx={{
-//           width: "90%",
-//           height: "90%",
-//           backgroundColor: "black",
-//           borderRadius: "12px",
-//           display: "flex",
-//           flexDirection: "column",
-//         }}
-//       >
-//         <Box
-//           sx={{
-//             flex: 1,
-//             display: "flex",
-//             flexDirection: "column",
-//             alignItems: "center",
-//             justifyContent: "center",
-//           }}
-//         >
-//           {children}
-//         </Box>
-//         <IconButton
-//           onClick={onClose}
-//           sx={{
-//             position: "absolute",
-//             top: 16,
-//             right: 16,
-//             color: "white",
-//           }}
-//         >
-//           <CloseIcon />
-//         </IconButton>
-//       </Box>
-//     </Box>
-//   );
-// };

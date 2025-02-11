@@ -277,7 +277,7 @@ const TicketTable = () =>
             options={siteOptions.map((site) => site.siteId)}
             value={siteId}
             onChange={(event, newValue) => setSiteId(newValue)}
-            renderInput={(params) => <TextField {...params} label="Site ID" />}
+            renderInput={(params) => <TextField {...params} label="Substation ID" />}
             sx={{ width: 200, height:"4opx" }}
           />
           <DatePicker
@@ -327,7 +327,7 @@ const TicketTable = () =>
     <TableCell sx={{ fontSize: 14, fontFamily: "Source Sans Pro", backgroundColor: "#d82b27", color: "white" }}>Raise Time</TableCell>
     <TableCell sx={{ fontSize: 14, fontFamily: "Source Sans Pro", backgroundColor: "#d82b27", color: "white" }}>Close Time</TableCell>
     <TableCell sx={{ fontSize: 14, fontFamily: "Source Sans Pro", backgroundColor: "#d82b27", color: "white" }}>Status</TableCell>
-    <TableCell sx={{ fontSize: 14, fontFamily: "Source Sans Pro", backgroundColor: "#d82b27", color: "white" }}>Site ID</TableCell>
+    <TableCell sx={{ fontSize: 14, fontFamily: "Source Sans Pro", backgroundColor: "#d82b27", color: "white" }}>Substation ID</TableCell>
     <TableCell sx={{ fontSize: 14, fontFamily: "Source Sans Pro", backgroundColor: "#d82b27", color: "white" }}>Serial Number</TableCell>
   </TableRow>
 </TableHead>

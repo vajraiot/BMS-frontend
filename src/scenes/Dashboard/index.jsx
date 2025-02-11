@@ -174,12 +174,12 @@ const Dashboard = () => {
     fetchData();
   }, [marginMinutes]); 
 
-  const handlePieClick = (data) => {
-    // Set the selected status
+  const handlePieClick = async (data) => {
+    // Set the selected status and open the dialog
     setSelectedStatus(data.name);
-  
     setOpenDialog(true);
   
+    // Initialize alarm counts
     const alarmCounts = {
       stringVoltageLNH: 0,
       cellVoltageLNH: 0,
@@ -204,225 +204,143 @@ const Dashboard = () => {
       chargerLoad: 0,
       alarmSupplyFuse: 0,
       testPushButton: 0,
-      resetPushButton: 0
+      resetPushButton: 0,
     };
   
-    // Fetch and aggregate the alarm data
-    const fetchDataForStatus = async () => {
-      try {
-        const response = await fetchCommunicationStatus(marginMinutes);
-        let filteredData;
-        let chartData = [];
+    // Helper function to filter data based on conditions
+    const filterData = (response, conditions) => {
+      return response.filter((item) => {
+        const bmsAlarms = item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO;
+        const chargerMonitoring = item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO || {};
+        return conditions(bmsAlarms, chargerMonitoring);
+      });
+    };
   
-        // Filter data based on the selected pie slice
-        switch (data.name) {
-          case 'Most Critical Count':
-            filteredData = response.filter(item => {
-              const MostCriticalConditions = item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO;
-              const chargerMonitoring = item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO || [];
+    // Helper function to generate chart data
+    const generateChartData = (filteredData, alarmType, condition) => {
+      const count = filteredData.filter((item) => condition(item)).length;
+      const details = filteredData
+        .filter((item) => condition(item))
+        .map((item) => ({
+          siteId: item.siteId,
+          serialNumber: item.generalDataDTO?.deviceDataDTO?.[0]?.serialNumber || "N/A", 
+          cellsConnectedCount:item.generalDataDTO?.deviceDataDTO?.[0]?.cellsConnectedCount,
+          stringvoltage: item.generalDataDTO?.deviceDataDTO?.[0]?.stringvoltage || "N/A",
+          instantaneousCurrent:item.generalDataDTO?.deviceDataDTO?.[0]?.instantaneousCurrent,
+          ambientTemperature:item.generalDataDTO?.deviceDataDTO?.[0]?.ambientTemperature,
+          socLatestValueForEveryCycle:item.generalDataDTO?.deviceDataDTO?.[0]?.socLatestValueForEveryCycle,
+          dodLatestValueForEveryCycle:item.generalDataDTO?.deviceDataDTO?.[0]?.dodLatestValueForEveryCycle,
+          batteryRunHours:item.generalDataDTO?.deviceDataDTO?.[0]?.batteryRunHours,
+        }));
+      console.log("item", filteredData);
+      return { name: alarmType, count, details };
+    };
+    try {
+      const response = await fetchCommunicationStatus(marginMinutes);
+      let filteredData;
+      let chartData = [];
   
-              return (
-                MostCriticalConditions?.stringVoltageLNH === 0 ||      // String Voltage Low
-                MostCriticalConditions?.cellVoltageLNH === 0 ||        // Cell Voltage Low
-                MostCriticalConditions?.socLN === true ||              // SOC Low
-                MostCriticalConditions?.batteryCondition === true ||   // Battery Open
-                chargerMonitoring?.chargerTrip === true  
-              );
-            });
+      // Define conditions and chart data generation logic for each case
+      switch (data.name) {
+        case 'Most Critical Count':
+          filteredData = filterData(response, (bmsAlarms, chargerMonitoring) => (
+            bmsAlarms?.stringVoltageLNH === 0 || // String Voltage Low
+            bmsAlarms?.cellVoltageLNH === 0 || // Cell Voltage Low
+            bmsAlarms?.socLN === true || // SOC Low
+            bmsAlarms?.batteryCondition === true || // Battery Open
+            chargerMonitoring?.chargerTrip === true
+          ));
   
-            // Update alarm counts for Most Critical Count
-            filteredData.forEach(item => {
-              const conditions = item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO;
-              const chargerMonitoring = item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO || [];
+          chartData = [
+            generateChartData(filteredData, "String(V) Low", (item) => item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO?.stringVoltageLNH === 0),
+            generateChartData(filteredData, "Cell(V) Low", (item) => item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO?.cellVoltageLNH === 0),
+            generateChartData(filteredData, "SOC Low", (item) => item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO?.socLN === true),
+            generateChartData(filteredData, "Battery Open", (item) => item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO?.batteryCondition === true),
+            generateChartData(filteredData, "Charger Trip", (item) => item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO?.chargerTrip === true),
+          ];
+          break;
   
-              if (conditions?.stringVoltageLNH === 0) alarmCounts.stringVoltageLNH++;
-              if (conditions?.cellVoltageLNH === 0) alarmCounts.cellVoltageLNH++;
-              if (conditions?.socLN === true) alarmCounts.socLN++;
-              if (conditions?.batteryCondition === true) alarmCounts.batteryCondition++;
-              if (chargerMonitoring?.chargerTrip === true) alarmCounts.chargerTrip++;
-            });
+        case 'Critical Count':
+          filteredData = filterData(response, (bmsAlarms, chargerMonitoring) => (
+            bmsAlarms?.stringVoltageLNH === 2 || // String Voltage High
+            bmsAlarms?.cellVoltageLNH === 2 || // Cell Voltage High
+            bmsAlarms?.stringCurrentHN === true || // String Current High
+            chargerMonitoring?.inputMains === true || // Input Mains Failure
+            chargerMonitoring?.inputPhase === true || // Input Phase Failure
+            chargerMonitoring?.rectifierFuse === true || // Rectifier Fuse Failure
+            chargerMonitoring?.filterFuse === true || // Filter Fuse Failure
+            chargerMonitoring?.outputMccb === true || // Output MCCB Failure
+            chargerMonitoring?.inputFuse === true || // Input Fuse Failure
+            chargerMonitoring?.acVoltageULN === 2
+          ));
   
-            // Generate alarm combinations for Most Critical Count
-            chartData = [
-              {
-                name: "String(V) Low",
-                count: filteredData.filter(
-                  (item) => item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO?.stringVoltageLNH === 0
-                ).length,
-                details: filteredData
-                  .filter((item) => item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO?.stringVoltageLNH === 0)
-                  .map((item) => ({
-                    siteId: item.siteId,
-                    serialNumber: item.serialNumber,
-                  })),
-              },
-              {
-                name: "Cell(V) Low",
-                count: filteredData.filter(
-                  (item) => item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO?.cellVoltageLNH === 0
-                ).length,
-                details: filteredData
-                  .filter((item) => item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO?.cellVoltageLNH === 0)
-                  .map((item) => ({
-                    siteId: item.siteId,
-                    serialNumber: item.serialNumber,
-                  })),
-              },
-              // Add other alarm types similarly
-            ];
-            setBarChartData(chartData);
-            break;
-    
-          // Add cases for "Critical Count", "Major Count", and "Minor Count" similarly
-        
-    
-        // Update the bar chart with the corresponding alarm data
-        
+          chartData = [
+            generateChartData(filteredData, "String(V) High", (item) => item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO?.stringVoltageLNH === 2),
+            generateChartData(filteredData, "Cell(V) High", (item) => item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO?.cellVoltageLNH === 2),
+            generateChartData(filteredData, "String(A) High", (item) => item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO?.stringCurrentHN === true),
+            generateChartData(filteredData, "Input Mains Fail", (item) => item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO?.inputMains === true),
+            generateChartData(filteredData, "Input Phase Fail", (item) => item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO?.inputPhase === true),
+            generateChartData(filteredData, "Rectifier Fuse Fail", (item) => item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO?.rectifierFuse === true),
+            generateChartData(filteredData, "Filter Fuse Fail", (item) => item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO?.filterFuse === true),
+            generateChartData(filteredData, "Output MCCB Fail", (item) => item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO?.outputMccb === true),
+            generateChartData(filteredData, "Input Fuse Fail", (item) => item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO?.inputFuse === true),
+            generateChartData(filteredData, "AC(V) ULN", (item) => item?.item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO?.acVoltageULN === 2),
+          ];
+          break;
   
-          case 'Critical Count':
-            filteredData = response.filter(item => {
-              const CriticalConditions = item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO;
-              const ChargerMonitoringCritical = item?.generalDataDTO?.chargerMonitoringDTO?.[0] || [];
+        case 'Major Count':
+          filteredData = filterData(response, (bmsAlarms, chargerMonitoring) => (
+            bmsAlarms?.ambientTemperatureHN === true || // Ambient Temperature High
+            bmsAlarms?.cellCommunication === true || // Cell Communication Failure
+            chargerMonitoring?.dcVoltageOLN === 2 || // DC Over Voltage Detection
+            chargerMonitoring?.dcVoltageOLN === 0 || // DC Under Voltage Detection
+            chargerMonitoring?.acVoltageULN === 0 || // AC Under Voltage Detection
+            chargerMonitoring?.outputFuse === true // Output Fuse Failure
+          ));
   
-              return (
-                CriticalConditions?.stringVoltageLNH === 2 ||              // String Voltage High
-                CriticalConditions?.cellVoltageLNH === 2 ||                // Cell Voltage High
-                CriticalConditions?.stringCurrentHN === true ||            // String Current High
-                ChargerMonitoringCritical?.inputMains === true ||          // Input Mains Failure
-                ChargerMonitoringCritical?.inputPhase === true ||          // Input Phase Failure
-                ChargerMonitoringCritical?.rectifierFuse === true ||       // Rectifier Fuse Failure
-                ChargerMonitoringCritical?.filterFuse === true ||          // Filter Fuse Failure
-                ChargerMonitoringCritical?.outputMccb === true ||          // Output MCCB Failure
-                ChargerMonitoringCritical?.inputFuse === true ||           // Input Fuse Failure
-                ChargerMonitoringCritical?.acVoltageULN === 2 
-              );
-            });
+          chartData = [
+            generateChartData(filteredData, "Ambient Temperature High", (item) => item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO?.ambientTemperatureHN === true),
+            generateChartData(filteredData, "Cell Communication Failure", (item) => item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO?.cellCommunication === true),
+            generateChartData(filteredData, "DC Over Voltage Detection", (item) => item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO?.dcVoltageOLN === 2),
+            generateChartData(filteredData, "DC Under Voltage Detection", (item) => item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO?.dcVoltageOLN === 0),
+            generateChartData(filteredData, "AC Under Voltage Detection", (item) =>item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO?.acVoltageULN === 0),
+            generateChartData(filteredData, "Output Fuse Failure", (item) =>item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO?.chargerDTO?.outputFuse === true),
+          ];
+          break;
   
-            // Update alarm counts for Critical Count
-            filteredData.forEach(item => {
-              const CriticalConditions = item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO;
-              const ChargerMonitoringCritical = item?.generalDataDTO?.chargerMonitoringDTO?.[0] || [];
+        case 'Minor Count':
+          filteredData = filterData(response, (bmsAlarms, chargerMonitoring) => (
+            bmsAlarms?.bmsSedCommunication === true || // Battery Status (Discharging)
+            bmsAlarms?.stringCommunication === true || // String Communication
+            bmsAlarms?.cellTemperatureHN === true || // Cell Temperature High
+            bmsAlarms?.buzzer === true || // Buzzer Alarm
+            chargerMonitoring?.chargerLoad === true || // Charger Load Detection
+            chargerMonitoring?.alarmSupplyFuse === true || // Alarm Supply Fuse Failure
+            chargerMonitoring?.testPushButton === true || // Test Push Button Pressed
+            chargerMonitoring?.resetPushButton === true // Reset Push Button Pressed
+          ));
   
-              if (CriticalConditions?.stringVoltageLNH === 2) alarmCounts.stringVoltageLNHHigh++;
-              if (CriticalConditions?.cellVoltageLNH === 2) alarmCounts.cellVoltageLNHHigh++;
-              if (CriticalConditions?.stringCurrentHN === true) alarmCounts.stringCurrentHN++;
-              if (ChargerMonitoringCritical?.inputMains === true) alarmCounts.inputMains++;
-              if (ChargerMonitoringCritical?.inputPhase === true) alarmCounts.inputPhase++;
-              if (ChargerMonitoringCritical?.rectifierFuse === true) alarmCounts.rectifierFuse++;
-              if (ChargerMonitoringCritical?.filterFuse === true) alarmCounts.filterFuse++;
-              if (ChargerMonitoringCritical?.outputMccb === true) alarmCounts.outputMccb++;
-              if (ChargerMonitoringCritical?.inputFuse === true) alarmCounts.inputFuse++;
-              if (ChargerMonitoringCritical?.acVoltageULN === 2) alarmCounts.acVoltageULN++;
-            });
+          chartData = [
+            generateChartData(filteredData, "Battery Status (Discharging)", (item) => item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO?.bmsSedCommunication === true),
+            generateChartData(filteredData, "String Communication", (item) => item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO?.stringCommunication === true),
+            generateChartData(filteredData, "Buzzer Alarm", (item) => item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO?.buzzer === true),
+            generateChartData(filteredData, "Charger Load Detection", (item) => item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO?.chargerLoad === true),
+            generateChartData(filteredData, "Alarm Supply Fuse Failure", (item) => item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO?.alarmSupplyFuse === true),
+            generateChartData(filteredData, "Test Push Button Pressed", (item) => item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO?.testPushButton === true),
+            generateChartData(filteredData, "Reset Push Button Pressed", (item) => item?.generalDataDTO?.chargerMonitoringDTO?.[0]?.chargerDTO?.resetPushButton === true),
+          ];
+          break;
   
-            // Generate alarm combinations for Critical Count
-            chartData = [
-              { name: 'String(V) High', count: alarmCounts.stringVoltageLNHHigh },
-              { name: 'Cell(V) High', count: alarmCounts.cellVoltageLNHHigh },
-              { name: 'String(A) High', count: alarmCounts.stringCurrentHN },
-              { name: 'Input Mains Fail', count: alarmCounts.inputMains },
-              { name: 'Input Phase Fail', count: alarmCounts.inputPhase },
-              { name: 'Rectifier Fuse Fail', count: alarmCounts.rectifierFuse },
-              { name: 'Filter Fuse Fail', count: alarmCounts.filterFuse },
-              { name: 'Output MCCB Fail', count: alarmCounts.outputMccb },
-              { name: 'Input Fuse Fail', count: alarmCounts.inputFuse },
-              { name: 'AC(V) ULN', count: alarmCounts.acVoltageULN }
-            ];
-            break;
-  
-          case 'Major Count':
-            filteredData = response.filter(item => {
-              const MajorConditions = item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO;
-              const chargerMonitoring = item?.generalDataDTO?.chargerMonitoringDTO?.[0] || [];
-          
-              return (
-                MajorConditions?.ambientTemperatureHN === true ||  // Ambient Temperature High
-                MajorConditions?.cellCommunication === true ||     // Cell Communication Failure
-                chargerMonitoring?.dcVoltageOLN === 2 ||           // DC Over Voltage Detection
-                chargerMonitoring?.dcVoltageOLN === 0 ||           // DC Under Voltage Detection
-                chargerMonitoring?.acVoltageULN === 0 ||           // AC Under Voltage Detection
-                chargerMonitoring?.outputFuse === true             // Output Fuse Failure
-              );
-            });
-          
-            // Update alarm counts for Major Count
-            filteredData.forEach(item => {
-              const conditions = item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO;
-              const chargerMonitoring = item?.generalDataDTO?.chargerMonitoringDTO?.[0] || [];
-          
-              if (conditions?.ambientTemperatureHN === true) alarmCounts.ambientTemperatureHN++;
-              if (conditions?.cellCommunication === true) alarmCounts.cellCommunication++;
-              if (chargerMonitoring?.dcVoltageOLN === 2) alarmCounts.dcVoltageOLN++;
-              if (chargerMonitoring?.dcVoltageOLN === 0) alarmCounts.dcVoltageOLN++;
-              if (chargerMonitoring?.acVoltageULN === 0) alarmCounts.acVoltageULN++;
-              if (chargerMonitoring?.outputFuse === true) alarmCounts.outputFuse++;
-            });
-          
-            // Generate alarm combinations for Major Count
-            chartData = [
-              { name: 'Ambient Temperature High', count: alarmCounts.ambientTemperatureHN },
-              { name: 'Cell Communication Failure', count: alarmCounts.cellCommunication },
-              { name: 'DC Over Voltage Detection', count: alarmCounts.dcVoltageOLN },
-              { name: 'DC Under Voltage Detection', count: alarmCounts.dcVoltageOLN },
-              { name: 'AC Under Voltage Detection', count: alarmCounts.acVoltageULN },
-              { name: 'Output Fuse Failure', count: alarmCounts.outputFuse }
-            ];
-            break;
-  
-          case 'Minor Count':
-            filteredData = response.filter(item => {
-              const MinorConditions = item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO;
-              const chargerMonitoringMinor = item?.generalDataDTO?.chargerMonitoringDTO?.[0] || [];
-          
-              return (
-                MinorConditions?.bmsSedCommunication === true ||    // Battery Status (Discharging)
-                MinorConditions?.stringCommunication === true ||   // String Communication
-                MinorConditions?.cellTemperatureHN === true ||    // Cell Temperature High
-                MinorConditions?.buzzer === true ||                // Buzzer Alarm
-                chargerMonitoringMinor?.chargerLoad === true ||    // Charger Load Detection
-                chargerMonitoringMinor?.alarmSupplyFuse === true ||// Alarm Supply Fuse Failure
-                chargerMonitoringMinor?.testPushButton === true || // Test Push Button Pressed
-                chargerMonitoringMinor?.resetPushButton === true   // Reset Push Button Pressed
-              );
-            });
-          
-            // Update alarm counts for Minor Count
-            filteredData.forEach(item => {
-              const conditions = item?.generalDataDTO?.deviceDataDTO?.[0]?.bmsAlarmsDTO;
-              const chargerMonitoringMinor = item?.generalDataDTO?.chargerMonitoringDTO?.[0] || [];
-          
-              if (conditions?.bmsSedCommunication === true) alarmCounts.bmsSedCommunication++;
-              if (conditions?.stringCommunication === true) alarmCounts.stringCommunication++;
-              if (conditions?.cellTemperatureHN === true) alarmCounts.cellTemperatureHN++;
-              if (conditions?.buzzer === true) alarmCounts.buzzer++;
-              if (chargerMonitoringMinor?.chargerLoad === true) alarmCounts.chargerLoad++;
-              if (chargerMonitoringMinor?.alarmSupplyFuse === true) alarmCounts.alarmSupplyFuse++;
-              if (chargerMonitoringMinor?.testPushButton === true) alarmCounts.testPushButton++;
-              if (chargerMonitoringMinor?.resetPushButton === true) alarmCounts.resetPushButton++;
-            });
-          
-            // Generate alarm combinations for Minor Count
-            chartData = [
-              { name: 'Battery Status (Discharging)', count: alarmCounts.bmsSedCommunication },
-              { name: 'String Communication', count: alarmCounts.stringCommunication },
-              { name: 'Cell Temperature High', count: alarmCounts.cellTemperatureHN },
-              { name: 'Buzzer Alarm', count: alarmCounts.buzzer },
-              { name: 'Charger Load Detection', count: alarmCounts.chargerLoad },
-              { name: 'Alarm Supply Fuse Failure', count: alarmCounts.alarmSupplyFuse },
-              { name: 'Test Push Button Pressed', count: alarmCounts.testPushButton },
-              { name: 'Reset Push Button Pressed', count: alarmCounts.resetPushButton }
-            ];
-            break;
-        }
-  
-        // Update the bar chart with the corresponding alarm data
-        setBarChartData(chartData);
-      } catch (error) {
-        console.error('Error fetching communication status:', error);
+        default:
+          console.warn("Unknown status selected:", data.name);
+          return;
       }
-    };
   
-    fetchDataForStatus();
+      // Update the bar chart with the generated data
+      setBarChartData(chartData);
+    } catch (error) {
+      console.error("Error fetching communication status:", error);
+    }
   };
   const handlePieClickCommu = (data) => { 
     // Set the selected status

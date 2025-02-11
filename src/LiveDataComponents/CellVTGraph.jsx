@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import HighchartsReact from "highcharts-react-official";
 import Highcharts from "highcharts";
@@ -69,7 +68,7 @@ const CellVTGraph = (site,serial,cellNumber) => {
     const startDateTime = `${formattedDate} 00:00:00`; // 'YYYY-MM-DD 00:00:00'
     const endDateTime = `${formattedDate} 23:59:59`; // 'YYYY-MM-DD 23:59:59'
   
-    const apiUrl = `http://122.175.45.16:51470/getSpecificCellDataBySiteIdAndSerialNumberBetweenDates?siteId=${cellInfo.siteId}&serialNumber=${cellInfo.serialNumber}&cellNumber=${cellInfo.cellNumber}&strStartDate=${encodeURIComponent(
+    const apiUrl = `http://122.175.45.16:51270/getSpecificCellDataBySiteIdAndSerialNumberBetweenDates?siteId=${cellInfo.siteId}&serialNumber=${cellInfo.serialNumber}&cellNumber=${cellInfo.cellNumber}&strStartDate=${encodeURIComponent(
       startDateTime
     )}&strEndDate=${encodeURIComponent(endDateTime)}`;
   
@@ -186,16 +185,16 @@ const CellVTGraph = (site,serial,cellNumber) => {
   return (
       <Box
       sx={{
-        p: "20px",
+        p: "13px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        width: "100%",
+        width: "70%",
         maxWidth: "1200px", // Limit max width of the content
-        backgroundColor: "#121212", // Dark background for better contrast
+         backgroundColor: "white", // Dark background for better contrast
         borderRadius: "10px",
-        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.25)",
+        //  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.25)",
       }}
       >
       {/* Date Picker and Download Button Row */}
@@ -211,14 +210,27 @@ const CellVTGraph = (site,serial,cellNumber) => {
     >
       {/* Start Date Picker */}
       <Box sx={{ flex: 1 }}>
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <DatePicker
-            label="Start Date"
-            value={startDate}
-            onChange={(date) => setStartDate(date)}
-            renderInput={(params) => <TextField {...params} sx={{ width: "100%" }} />}
-          />
-        </LocalizationProvider>
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <DatePicker
+  label="Start Date"
+  value={startDate}
+  onChange={(date) => setStartDate(date)}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      sx={{
+        width: 200,
+        "& .MuiInputBase-root": { height: "20px" }, // Set height correctly
+        input: { color: "white" }, // Set text color to white
+        label: { color: "white" }, // Set label color to white
+        svg: { color: "white" }, // Set calendar icon color to white
+      }}
+    />
+  )}
+/>
+
+</LocalizationProvider>
+
       </Box>
 
       {/* Cell Number Text */}
@@ -228,7 +240,7 @@ const CellVTGraph = (site,serial,cellNumber) => {
           textAlign: "center", // Center the text
         }}
       >
-        <Typography variant="h6" sx={{ color: "white" }}>
+        <Typography variant="h6" sx={{ color: "black" }}>
           {`Cell Number: ${cellInfo.cellNumber}`}
         </Typography>
       </Box>
@@ -240,6 +252,7 @@ const CellVTGraph = (site,serial,cellNumber) => {
           aria-label="Download Excel"
           sx={{
             padding: 1,
+            color: "black",
           }}
         >
           <FileDownloadIcon fontSize="large" />
@@ -253,7 +266,7 @@ const CellVTGraph = (site,serial,cellNumber) => {
       sx={{
         width: "100%",
         height: "500px", // Fixed height to enable scrolling
-        backgroundColor: "#1e1e1e",
+        // backgroundColor: "#1e1e1e",
         borderRadius: "10px",
         border: "1px solid #444",
         overflowY: "auto", // Enable vertical scrolling
