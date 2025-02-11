@@ -1,7 +1,9 @@
 import React, { useContext, useState } from "react";
-import { useTheme } from "@mui/material";
+import { useTheme,IconButton } from "@mui/material";
 import { AppContext } from "../../../services/AppContext";
 import ReportsBar from "../ReportsBar/ReportsBar";
+import * as XLSX from "xlsx";
+import excelIcon from "../../../assets/images/png/ExcellTrans100_98.png";
 import {
   Table,
   TableBody,
@@ -122,10 +124,56 @@ const Historical = () => {
 
   const formattedData = combineAlarmsData(dataArray);
   const displayedData = sortedData(formattedData);
+  const handleDownloadExcel = () => {
+    if (!formattedData || formattedData.length === 0) {
+      alert("No data available to export!");
+      return;
+    }
+  
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+  
+    // Map data to Excel format
+    const excelData = displayedData.map((row) => {
+      return Object.keys(row).map((key) => {
+        if (key === "packetDateTime" || key === "serverTime") {
+          return TimeFormat(row[key]);
+        } else if (key === "dcVoltageOLN") {
+          return row[key] === 0 ? "Low" : row[key] === 1 ? "Normal" : row[key] === 2 ? "Over" : row[key];
+        } else if (typeof row[key] === "boolean") {
+          return row[key] ? "Fail" : "Normal";
+        } else {
+          return row[key] !== undefined && row[key] !== null ? row[key] : "No Data";
+        }
+      });
+    });
+  
+    // Add headers only if data exists
+    if (formattedData.length > 0) {
+      const headers = Object.keys(formattedData[0]).map((key) => columnMappings[key] || key);
+      excelData.unshift(headers);
+    }
+  
+    // Create a worksheet
+    const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+  
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Historical Data");
+  
+    // Generate Excel file and trigger download
+    XLSX.writeFile(workbook, "Historical_Data.xlsx");
+  };
+  
 
   return (
     <div>
-      <ReportsBar pageType="historical" />
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+        <ReportsBar pageType="historical" />
+        <IconButton onClick={handleDownloadExcel} color="primary" aria-label="Download Excel">
+  <img src={excelIcon} alt="Download Excel" style={{ width: "24px", height: "24px" }} />
+</IconButton>
+
+      </div>
 
       {formattedData && formattedData.length > 0 ? (
         <>
@@ -182,7 +230,7 @@ const Historical = () => {
                           key={idx}
                           sx={{ 
                             border: '1px solid #ccc', // Ensure visibility
-                            padding: '5px', // Decreased padding
+                            padding: '3px', // Decreased padding
                             fontWeight: 'bold', // Bold text
                           }}
                         >

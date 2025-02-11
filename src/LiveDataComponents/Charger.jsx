@@ -4,6 +4,7 @@ import { tokens } from "../theme.js"
 
 
 export const Charger = ({charger}) => {
+    
     const theme =useTheme();
     const colors=tokens(theme.palette.mode);
     const{deviceId,acVoltage,acCurrent ,frequency ,energy}=charger[0];
@@ -27,13 +28,13 @@ export const Charger = ({charger}) => {
             flexDirection="column"
           >
             {[
-              { label: "Device Id", value: deviceId },
-              { label: "AC Voltage", value: acVoltage },
-              { label: "AC Current", value: acCurrent },
-              { label: "Frequency", value: frequency },
-              { label: "Energy", value: energy },
+        
+              { label: "AC Voltage", value: acVoltage, unit: "V" },
+              { label: "AC Current", value: acCurrent, unit: "A" },
+              { label: "Frequency", value: frequency, unit: "Hz" },
+      
               
-            ].map(({ label, value }, index) => (
+            ].map(({ label, value,unit }, index) => (
               <Box
                 key={index}
                 display="flex"
@@ -44,7 +45,7 @@ export const Charger = ({charger}) => {
                 <Typography
                   variant="h5"
                   fontWeight="bold"
-                  style={{ minWidth: "130px" }} // Fixed width for labels
+                  style={{ minWidth: "100px" }} // Fixed width for labels
                 >
                   {label}
                 </Typography>
@@ -58,7 +59,7 @@ export const Charger = ({charger}) => {
                   variant="h5"
                   style={{ color: colors.greenAccent[500] }}
                 >
-                  {value}
+                  {value}{" "}{unit}
                 </Typography>
               </Box>
             ))}

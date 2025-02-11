@@ -7,7 +7,7 @@ import { Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 const BASE_URL = "http://122.175.45.16:51270";
 import axios from "axios";
 const columnMappingsPart1 = {
-  siteId: 'Site ID',
+  siteId: 'Substation ID',
   vendorName: 'Vendor Name',
   latitude: 'Latitude',
   longitude: 'Longitude',
@@ -21,7 +21,6 @@ const columnMappingsPart2 = {
   firstUsedDate: 'First Used Date',
   batterySerialNumber: 'Battery Serial Number',
   batteryBankType: 'Battery Bank Type',
-  ahCapacity: 'AH Capacity',
   manufacturerName: 'Manufacturer Name',
   designVoltage: 'Design Voltage',
 };
@@ -314,9 +313,9 @@ const handleAddSite = async () => {
             </Typography>
             <Box width="200px">
   <FormControl fullWidth margin="dense"> {/* Use margin="dense" for a compact layout */}
-    <InputLabel sx={{ fontSize: '12px' }}>Site ID</InputLabel> {/* Reduce label font size */}
+    <InputLabel sx={{ fontSize: '12px' }}>Substation ID</InputLabel> {/* Reduce label font size */}
     <Select
-      label="Site ID"
+      label="Substation ID"
       name="siteId"
       value={formData[key] || ''}
       onChange={handleInputChange}

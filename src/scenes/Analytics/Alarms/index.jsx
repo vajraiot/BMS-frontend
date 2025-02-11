@@ -1,8 +1,10 @@
 import React, { useContext,useState } from "react";
-import { useTheme } from "@mui/material";
+import { useTheme,IconButton } from "@mui/material";
 import { ColorModeContext, tokens } from "../../../theme";
 import { AppContext } from "../../../services/AppContext";
 import ReportsBar from "../ReportsBar/ReportsBar";
+import excelIcon from "../../../assets/images/png/ExcellTrans100_98.png";
+import * as XLSX from "xlsx";
 import {
   Table,
   TableBody,
@@ -133,11 +135,38 @@ const Alarms = () => {
  
   const formattedData = combineAlarmsData(dataArray);
   const displayedData = sortedData(formattedData);
-  
+  const handleDownloadExcel = () => {
+    if (formattedData.length === 0) {
+      alert("No data available for download.");
+      return;
+    }
+
+    const workbook = XLSX.utils.book_new();
+    const excelData = displayedData.map((row) =>
+      Object.keys(row).map((key) =>
+        key === "packetDateTime" ? TimeFormat(row[key]) : row[key] || "No Data"
+      )
+    );
+    const headers = Object.keys(formattedData[0]).map(
+      (key) => columnMappings[key] || key
+    );
+    excelData.unshift(headers);
+    const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Alarms Data");
+    XLSX.writeFile(workbook, "Alarms_Report.xlsx");
+  };
+
   console.log(formattedData); 
   return (
     <div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
         <ReportsBar pageType="alarms" />
+        <IconButton onClick={handleDownloadExcel} color="primary" aria-label="Download Excel">
+  <img src={excelIcon} alt="Download Excel" style={{ width: "24px", height: "24px" }} />
+</IconButton>
+
+      </div>
+
 
       {formattedData && formattedData.length > 0 ? (
         <>

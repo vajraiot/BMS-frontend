@@ -35,10 +35,10 @@ export default function DischargeCycleWise({
      flexDirection="column"
      justifyContent="center"
      alignItems="flex-start"
-     mt="10px"
-     ml="8px"
+      mt="10px"
+      ml="8px"
    >
-     <Typography variant="h6" mb="10px">
+     <Typography variant="h6" mb="1px">
        <strong>Discharge-Cycle-Wise</strong>
      </Typography>
      <Box
@@ -46,13 +46,11 @@ export default function DischargeCycleWise({
        flexDirection="column"
      >
        {[
-         { label: "Peak Discharge Current", value: peakDischargeCurrent },
-         { label: "Avg Discharge Current", value: averageDischargingCurrent },
-         { label: "AH Out Discharge", value: ahOutForOneDischargeCycle },
+         { label: "Peak Discharge Current", value: peakDischargeCurrent ,unit:"A"},
          { label: "Discharge Time", value: dischargeTime(totalSeconds)},
    
          
-       ].map(({ label, value }, index) => (
+       ].map(({ label, value ,unit}, index) => (
          <Box
                         key={index}
                         display="flex"
@@ -77,7 +75,7 @@ export default function DischargeCycleWise({
                           variant="h5"
                           style={{ color: colors.greenAccent[500] }}
                         >
-                          {value}
+                          {value}{" "}{unit}
                         </Typography>
                       </Box>
        ))}

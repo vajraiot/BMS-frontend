@@ -1,16 +1,12 @@
 import React, { useContext } from "react";
-import { useTheme } from "@mui/material";
+import { useTheme,IconButton } from "@mui/material";
 import { ColorModeContext, tokens } from "../../../theme";
 import { Box, IconButton, TextField, Autocomplete, useTheme } from "@mui/material";
 import { AppContext } from "../../../services/AppContext";
 import{fetchMonthlyBatteryandChargerdetails} from "../../../services/apiService"
-import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
-import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
-import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
-import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
-
+import excelIcon from "../../../assets/images/png/ExcellTrans100_98.png";
 import SearchIcon from "@mui/icons-material/Search";
-
+import * as XLSX from "xlsx";
 import 'react-datetime/css/react-datetime.css';
 import {
   Table,
@@ -174,8 +170,43 @@ const Monthly = () => {
   const formattedData = formatData(data);
   const displayedData = sortedData(formattedData);
 
+  const handleDownloadExcel = () => {
+    // Create a new workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Map data to Excel format
+    const excelData = displayedData.map((row) => {
+      return Object.keys(row).map((key) => {
+        if (key === "packetDateTime" || key === "serverTime") {
+          return TimeFormat(row[key]);
+        } else if (key === "dcVoltageOLN") {
+          return row[key] === 0 ? "Low" : row[key] === 1 ? "Normal" : row[key] === 2 ? "Over" : row[key];
+        } else if (typeof row[key] === "boolean") {
+          return row[key] ? "Fail" : "Normal";
+        } else {
+          return row[key] !== undefined && row[key] !== null ? row[key] : "No Data";
+        }
+      });
+    });
+
+    // Add headers to the Excel data
+    const headers = Object.keys(formattedData[0]).map((key) => columnMappings[key] || key);
+    excelData.unshift(headers);
+
+    // Create a worksheet
+    const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Historical Data");
+
+    // Generate Excel file and trigger download
+    XLSX.writeFile(workbook, "Monthly_Data.xlsx");
+  };
+
+
 
   return (
+    
     <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" p={2} gap={2} >
       
       {/* Grid 1: Site ID, Serial Number, Year and Month, Search */}
@@ -186,7 +217,7 @@ const Monthly = () => {
           options={siteOptions.map((site) => site.siteId)}
           value={siteId}
           onChange={(event, newValue) => setSiteId(newValue)}
-          renderInput={(params) => <TextField {...params} label="Site ID" 
+          renderInput={(params) => <TextField {...params} label="Substation ID" 
           fullWidth
               sx={{
                 width: 200,
@@ -266,19 +297,9 @@ const Monthly = () => {
 
       {/* Grid 2: Color Mode Toggle, Notification Icon, Logout Icon */}
       <Box display="flex" justifyContent="flex-end" alignItems="center" marginLeft="10px">
-        {/* <IconButton onClick={colorMode.toggleColorMode}>
-          {theme.palette.mode === "dark" ? (
-            <DarkModeOutlinedIcon />
-          ) : (
-            <LightModeOutlinedIcon />
-          )}
-        </IconButton> */}
-        {/* <IconButton>
-          <NotificationsOutlinedIcon />
-        </IconButton> */}
-        {/* <IconButton onClick={handleLogout}>
-          <LogoutOutlinedIcon />
-        </IconButton> */}
+      <IconButton onClick={handleDownloadExcel} color="primary" aria-label="Download Excel">
+  <img src={excelIcon} alt="Download Excel" style={{ width: "24px", height: "24px" }} />
+</IconButton>
       </Box>
       
       {formattedData && formattedData.length > 0 ? (  
