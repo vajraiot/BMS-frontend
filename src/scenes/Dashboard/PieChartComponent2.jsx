@@ -5,7 +5,7 @@ import { Box, Typography } from '@mui/material';
 const PieChartComponent2 = ({ data1, handlePieClickCommu }) => {
   const outerRadius = 85;  // Outer radius for the pie chart
   const innerRadius = 30;  // Inner radius for the donut effect
-  const chartSize = 210;   // Chart size to ensure proper spacing
+  const chartSize = 200;   // Chart size to ensure proper spacing
 
   return (
     <Box display="flex" justifyContent="center" alignItems="center" >
