@@ -213,33 +213,27 @@ const DataDialog = ({ openDialog, handleCloseDialog, selectedStatus, barChartDat
           </svg>
 
           <ResponsiveContainer width="100%" height={350}>
-            <BarChart 
-              data={barChartData} 
-              barSize={25} 
-              margin={{ bottom: 40 }} 
-              barCategoryGap="20%" 
-              barGap={5} 
-              scale="linear"
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" interval={0} angle={-45} textAnchor="end" dx={-5} dy={15} />
-              <YAxis hide={true} tick={{ fontSize: 14,  color:"black" , fontWeight: 500}} tickCount={5} domain={[1, barChartData.length]} />
-              <Tooltip cursor={{ fill: "rgba(0, 0, 0, 0.1)" }} />
-              <Legend />
-              
-              <Bar 
-                dataKey="count" 
-                fill={`url(#${currentGradient})`} 
-                onClick={handleBarClick}
-              >
-                <LabelList 
-                  dataKey="count" 
-                  position="top" 
-                  offset={5} 
-                  style={{ fontSize: "12px", fontWeight: "bold" }} 
-                />
-              </Bar>
-            </BarChart>
+          <BarChart 
+  data={barChartData} 
+  barSize={25} 
+  margin={{ bottom: 40 }} 
+  barCategoryGap="20%" 
+  barGap={5} 
+  scale="linear"
+>
+  <CartesianGrid strokeDasharray="3 3" />
+  <XAxis dataKey="name" interval={0} angle={-45} textAnchor="end" dx={-5} dy={15} tick={false} />
+  <YAxis hide={true} tick={false} tickCount={5} domain={[1, barChartData.length]} />
+  <Tooltip cursor={{ fill: "rgba(0, 0, 0, 0.1)" }} />
+  <Legend />
+  
+  <Bar 
+    dataKey="count" 
+    fill={`url(#${currentGradient})`} 
+    onClick={handleBarClick}
+  />
+</BarChart>
+
           </ResponsiveContainer>
         </DialogContent>
         <DialogActions>
