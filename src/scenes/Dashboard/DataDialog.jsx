@@ -32,7 +32,7 @@ const TableDialog = ({ open, handleClose, data }) => {
   );
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ backgroundImage: "linear-gradient(90deg, #00d4ff 0%, #090979 35%, #00d4ff 100%)", color: "white", fontWeight: "bold", textAlign: "center" }}>
+      <DialogTitle sx={{ backgroundImage: "linear-gradient(90deg, #00d4ff 0%, #090979 35%, #00d4ff 100%)", color: "white", fontWeight: "bold", textAlign: "center",  height:"30px"}}>
         Data for {data.name}
       </DialogTitle>
       <DialogContent>
